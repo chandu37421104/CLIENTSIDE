@@ -23,7 +23,7 @@ export const Facultynavbar = () => {
               <Link to="/facultytask" className="block py-2 px-3 text-white hover:text-blue-700">Tasks</Link>
             </li>
             <li>
-              <Link to="/leaderboard" className="block py-2 px-3 text-white hover:text-blue-700">Leaderboard</Link>
+              <Link to="/facultyleaderboard" className="block py-2 px-3 text-white hover:text-blue-700">Leaderboard</Link>
             </li>
             <li>
               <Link to="/facultyrewards" className="block py-2 px-3 text-white hover:text-blue-700">Rewards</Link>

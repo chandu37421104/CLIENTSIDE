@@ -10,33 +10,31 @@ import { Signin } from './pages/Signin';
 import { ForgotPassword } from './pages/Forgotpassword';
 import { Facultydashboard } from './pages/Facultydashboard';
 import { Facultytask } from './pages/Facultytask';
-
+import { Facultyleaderboard } from './pages/Facultyleaderboard';
 import { Facultyrewards } from './pages/Facultyrewards';
-
-import { Pitask } from './pages/Pitask';
-
-import { Pirewards } from './pages/Pirewards';
-import Admindashboard from './pages/Admindashboard';
 import { Pidashboard } from './pages/Pidashboard';
+import { Pitask } from './pages/Pitask';
+import { Pileaderboard } from './pages/Pileaderboard';
+import { Pirewards } from './pages/Pirewards';
 
 function AppContent() {
   const location = useLocation();
 
   // Array of paths where no navbar should be shown
-  const noNavbarPaths = ['/signin', '/forgotpassword' , '/admindashbord'];
+  const noNavbarPaths = ['/signin', '/forgotpassword'];
 
   // Array to determine which navbar to show
   const facultyNavPaths = [
     '/facultydashboard',
     '/facultytask',
-    
+    '/facultyleaderboard',
     '/facultyrewards',
   ];
 
   const piNavPaths = [
     '/pidashboard',
     '/pitask',
-   
+    '/pileaderboard',
     '/pirewards',
   ];
 
@@ -72,16 +70,14 @@ function AppContent() {
         {/* Faculty Routes */}
         <Route path="/facultydashboard" element={<Facultydashboard />} />
         <Route path="/facultytask" element={<Facultytask />} />
-
+        <Route path="/facultyleaderboard" element={<Facultyleaderboard />} />
         <Route path="/facultyrewards" element={<Facultyrewards />} />
 
         {/* PI Routes */}
-       <Route path="/pidashboard" element={<Pidashboard />} />
+        <Route path="/pidashboard" element={<Pidashboard />} />
         <Route path="/pitask" element={<Pitask />} />
-       
+        <Route path="/pileaderboard" element={<Pileaderboard />} />
         <Route path="/pirewards" element={<Pirewards />} />
-
-        <Route path="/admindashbord" element={<Admindashboard />} />
       </Routes>
     </>
   );

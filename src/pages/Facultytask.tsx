@@ -8,7 +8,6 @@ export const Facultytask = () => {
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
   const [studentChecks, setStudentChecks] = useState<{ [key: number]: boolean }>({});
   const [zoomLink, setZoomLink] = useState("");
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   // Open the modal for specific task
   const handleCheckInClick = (taskId: number) => {
@@ -16,7 +15,6 @@ export const Facultytask = () => {
     setIsModalOpen(true);
     setStudentChecks({}); // Reset checkboxes
     setZoomLink(""); // Reset Zoom link
-    setSelectedFile(null); // Reset file selection
   };
 
   // Handle sending Zoom link
@@ -28,13 +26,7 @@ export const Facultytask = () => {
     alert(`Zoom link "${zoomLink}" sent.`);
   };
 
-  // Handle file selection for research task
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files ? e.target.files[0] : null;
-    setSelectedFile(file);
-  };
-
-  // Handle modal confirm action (mark task as completed)
+  // Handle modal confirm action
   const handleConfirm = () => {
     if (selectedTaskId !== null) {
       setTasks((prevTasks) =>
@@ -79,15 +71,7 @@ export const Facultytask = () => {
                     >
                       Check-In
                     </button>
-                )}
-                {task.title === 'Research' && task.status !== 'completed' && (
-                  <button
-                    onClick={() => handleCheckInClick(task.id)}
-                    className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-500"
-                  >
-                    Check-In
-                  </button>
-                )}
+                  )}
               </div>
             </div>
           ))}
@@ -99,11 +83,8 @@ export const Facultytask = () => {
         <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-lg w-96 p-6">
             <h2 className="text-xl font-semibold mb-4">
-              {selectedTaskId === 1 ? "Student Mentor Meeting Check-In" :
-               selectedTaskId === 3 ? "Research " : "Student Check-In"}
+              {selectedTaskId === 1 ? "Student Mentor Meeting Check-In" : "Student Check-In"}
             </h2>
-
-            {/* Modal content based on selected task */}
             {selectedTaskId === 1 && (
               <div className="mb-4">
                 <label htmlFor="zoom-link" className="block text-sm font-medium mb-2">
@@ -125,27 +106,7 @@ export const Facultytask = () => {
                 </button>
               </div>
             )}
-
-            {selectedTaskId === 3 && (
-              <div className="mb-4">
-                <label htmlFor="file-upload" className="block text-sm font-medium mb-2">
-                  Upload Research File
-                </label>
-                <input
-                  type="file"
-                  id="file-upload"
-                  onChange={handleFileChange}
-                  className="w-full border border-gray-300 rounded-lg p-2"
-                />
-                {selectedFile && (
-                  <div className="mt-2 text-sm text-gray-600">
-                    <span>Selected file: {selectedFile.name}</span>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {selectedTaskId !== 1 && selectedTaskId !== 3 && (
+            {selectedTaskId !== 1 && (
               <div className="space-y-2">
                 {/* Student list */}
                 {[
@@ -170,8 +131,6 @@ export const Facultytask = () => {
                 ))}
               </div>
             )}
-
-            {/* Modal Actions */}
             <div className="flex justify-end mt-4">
               <button
                 onClick={() => setIsModalOpen(false)}

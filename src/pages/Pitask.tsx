@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { pitasks as initialTasks } from '../data/mockData';
-import { PiTask } from '../types';
+import { PiTask} from '../types';
 
 export const Pitask = () => {
   const [tasks, setTasks] = useState<PiTask[]>(initialTasks);
