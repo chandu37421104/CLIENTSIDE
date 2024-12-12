@@ -4,7 +4,13 @@ import './index.css';
 import App from './App';
 import { AuthProvider } from './context/AuthContext'; // Import AuthProvider
 
-createRoot(document.getElementById('root')).render(
+const rootElement = document.getElementById('root');
+
+if (!rootElement) {
+  throw new Error("Root element not found. Make sure there is an element with id 'root' in your index.html.");
+}
+
+createRoot(rootElement).render(
   <StrictMode>
     <AuthProvider> {/* Wrap App with AuthProvider */}
       <App />

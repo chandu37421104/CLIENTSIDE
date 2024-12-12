@@ -2,37 +2,51 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { TaskProgress } from "../components/TaskProgress";
 
+interface Task {
+  id: string;
+  title: string;
+  status: "completed" | "pending";
+  points: number;
+}
+
+interface LeaderboardPlayer {
+  id: string;
+  name: string;
+  points: number;
+  rank: number;
+  avatar?: string;
+}
+
 const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
 export const Pidashboard = () => {
-  const [tasks, setTasks] = useState([]);
-  const [leaderboardData, setLeaderboardData] = useState([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [leaderboardData, setLeaderboardData] = useState<LeaderboardPlayer[]>([]);
   const [totalPoints, setTotalPoints] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
-  // Fetch PI tasks and leaderboard data
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Fetch tasks
-      const tasksResponse = await axios.get(`${API_BASE_URL}/tasks/pi`);
+      const [tasksResponse, leaderboardResponse] = await Promise.all([
+        axios.get(`${API_BASE_URL}/tasks/pi`),
+        axios.get(`${API_BASE_URL}/leaderboard/pi`),
+      ]);
+
       setTasks(tasksResponse.data);
 
-      // Calculate total points
       const points = tasksResponse.data
-        .filter((task) => task.status === "completed")
-        .reduce((sum, task) => sum + task.points, 0);
+        .filter((task: Task) => task.status === "completed")
+        .reduce((sum: number, task: Task) => sum + task.points, 0);
       setTotalPoints(points);
 
-      // Fetch leaderboard
-      const leaderboardResponse = await axios.get(`${API_BASE_URL}/leaderboard/pi`);
       setLeaderboardData(leaderboardResponse.data);
-
       setLoading(false);
     } catch (err) {
+      console.error("Error fetching dashboard data:", err);
       setError("Failed to load dashboard data. Please try again.");
       setLoading(false);
     }
@@ -42,7 +56,6 @@ export const Pidashboard = () => {
     fetchDashboardData();
   }, []);
 
-  // Determine badge information
   const getBadgeInfo = () => {
     if (totalPoints >= 5000) return { type: "Gold", color: "yellow-500", emoji: "🏆" };
     if (totalPoints >= 3000) return { type: "Silver", color: "gray-400", emoji: "🥈" };
@@ -84,15 +97,15 @@ export const Pidashboard = () => {
       </header>
 
       <div className="max-w-6xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <TaskProgress tasks={tasks} />
 
           <div className="bg-white rounded-lg shadow-sm p-6">
             <h2 className="text-xl font-semibold mb-4">Top 5 Leaders</h2>
             <div className="space-y-4">
-              {leaderboardData.slice(0, 5).map((player, index) => (
+              {leaderboardData.slice(0, 5).map((player) => (
                 <div
-                  key={index}
+                  key={player.id}
                   className="flex items-center justify-between p-2 bg-gray-50 rounded-lg"
                 >
                   <div className="flex items-center gap-3">

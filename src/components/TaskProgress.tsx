@@ -1,12 +1,19 @@
-import { Task } from '../types';
+import { FC } from "react";
+
+interface Task {
+  id: string;
+  title: string;
+  status: "completed" | "pending";
+  points: number;
+}
 
 interface TaskProgressProps {
   tasks: Task[];
 }
 
-export const TaskProgress = ({ tasks }: TaskProgressProps) => {
-  const completedTasks = tasks.filter(task => task.status === 'completed').length;
-  const progress = (completedTasks / tasks.length) * 100;
+export const TaskProgress: FC<TaskProgressProps> = ({ tasks }) => {
+  const completedTasks = tasks.filter((task) => task.status === "completed").length;
+  const progress = tasks.length > 0 ? (completedTasks / tasks.length) * 100 : 0;
 
   return (
     <div className="bg-white rounded-lg shadow-sm p-6">

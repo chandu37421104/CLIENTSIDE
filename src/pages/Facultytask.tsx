@@ -8,7 +8,6 @@ export const Facultytask = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
-  const [studentChecks, setStudentChecks] = useState<{ [key: number]: boolean }>({});
   const [zoomLink, setZoomLink] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -32,18 +31,17 @@ export const Facultytask = () => {
     fetchTasks();
   }, []);
 
-  // Open the modal for specific task
+  // Open the modal for a specific task
   const handleCheckInClick = (taskId: number) => {
     setSelectedTaskId(taskId);
     setIsModalOpen(true);
-    setStudentChecks({});
     setZoomLink("");
     setSelectedFile(null);
   };
 
   // Handle sending Zoom link
   const handleSendZoomLink = async () => {
-    if (zoomLink.trim() === "") {
+    if (!zoomLink.trim()) {
       alert("Please enter a Zoom link before sending.");
       return;
     }
@@ -58,7 +56,7 @@ export const Facultytask = () => {
     }
   };
 
-  // Handle file upload for research task
+  // Handle file upload for research tasks
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files ? e.target.files[0] : null;
     setSelectedFile(file);
@@ -81,7 +79,7 @@ export const Facultytask = () => {
     }
   };
 
-  // Handle modal confirm action (mark task as completed)
+  // Handle modal confirmation (mark task as completed)
   const handleConfirm = async () => {
     if (selectedTaskId !== null) {
       try {
@@ -149,7 +147,6 @@ export const Facultytask = () => {
         <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-lg w-96 p-6">
             <h2 className="text-xl font-semibold mb-4">Task Check-In</h2>
-
             {selectedTaskId && (
               <>
                 {selectedTaskId === 1 && (
@@ -173,7 +170,6 @@ export const Facultytask = () => {
                     </button>
                   </div>
                 )}
-
                 {selectedTaskId === 3 && (
                   <div className="mb-4">
                     <label htmlFor="file-upload" className="block text-sm font-medium mb-2">
@@ -200,7 +196,6 @@ export const Facultytask = () => {
                 )}
               </>
             )}
-
             <div className="flex justify-end mt-4">
               <button
                 onClick={() => setIsModalOpen(false)}

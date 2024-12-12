@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 
@@ -6,11 +6,12 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api
 
 export const Facultyrewards = () => {
   const { user } = useAuth(); // Get current user from AuthContext
-  const [completedTasks, setCompletedTasks] = useState([]);
+  const [completedTasks, setCompletedTasks] = useState<any[]>([]);
   const [totalPoints, setTotalPoints] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
+  // Fetch rewards data for the faculty user
   const fetchRewardsData = async () => {
     try {
       if (!user) {
@@ -19,10 +20,10 @@ export const Facultyrewards = () => {
         return;
       }
 
-      // Fetch tasks for the faculty user
+      // Fetch completed tasks
       const response = await axios.get(`${API_BASE_URL}/tasks/user/${user.id}`);
-      const tasks = response.data.filter((task) => task.status === "completed");
-      const points = tasks.reduce((sum, task) => sum + task.points, 0);
+      const tasks = response.data.filter((task: any) => task.status === "completed");
+      const points = tasks.reduce((sum: number, task: any) => sum + task.points, 0);
 
       setCompletedTasks(tasks);
       setTotalPoints(points);
@@ -37,6 +38,7 @@ export const Facultyrewards = () => {
     fetchRewardsData();
   }, [user]);
 
+  // Determine badge information
   const getBadgeInfo = () => {
     if (totalPoints >= 5000) return { type: "Gold", color: "yellow-500", emoji: "🏆" };
     if (totalPoints >= 3000) return { type: "Silver", color: "gray-400", emoji: "🥈" };
@@ -150,6 +152,7 @@ export const Facultyrewards = () => {
         </div>
       </div>
 
+      {/* Congratulations Section */}
       {badgeInfo && (
         <div className="mt-8 bg-white rounded-lg shadow-sm p-6 text-center">
           <h3 className="text-2xl font-semibold mb-2">Congratulations! 🎉</h3>

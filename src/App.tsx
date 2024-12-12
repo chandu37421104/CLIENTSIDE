@@ -1,5 +1,10 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Facultynavbar } from './components/Facultynavbar';
 import { Pinavbar } from './components/Pinavbar';
@@ -14,28 +19,24 @@ import { Facultytask } from './pages/Facultytask';
 import { Facultyrewards } from './pages/Facultyrewards';
 import { Pitask } from './pages/Pitask';
 import { Pirewards } from './pages/Pirewards';
-import Admindashboard from './pages/Admindashboard';
+import { Admindashboard } from './pages/Admindashboard';
 import { Pidashboard } from './pages/Pidashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 
-function AppContent() {
+const AppContent: React.FC = () => {
   const location = useLocation();
 
   // Array of paths where no navbar should be shown
-  const noNavbarPaths = ['/signin', '/forgotpassword', '/admindashbord'];
+  const noNavbarPaths: string[] = ['/signin', '/forgotpassword', '/admindashbord'];
 
-  // Array to determine which navbar to show
-  const facultyNavPaths = [
+  // Arrays to determine which navbar to show
+  const facultyNavPaths: string[] = [
     '/facultydashboard',
     '/facultytask',
     '/facultyrewards',
   ];
 
-  const piNavPaths = [
-    '/pidashboard',
-    '/pitask',
-    '/pirewards',
-  ];
+  const piNavPaths: string[] = ['/pidashboard', '/pitask', '/pirewards'];
 
   // Determine which navbar to render
   const shouldRenderFacultyNavbar = facultyNavPaths.includes(location.pathname);
@@ -43,6 +44,7 @@ function AppContent() {
 
   return (
     <>
+      {/* Render appropriate Navbar */}
       {!noNavbarPaths.includes(location.pathname) && (
         shouldRenderFacultyNavbar ? (
           <Facultynavbar />
@@ -53,7 +55,7 @@ function AppContent() {
         )
       )}
 
-      {/* Routes Configuration */}
+      {/* Route Configurations */}
       <Routes>
         {/* Authentication Routes */}
         <Route path="/signin" element={<Signin />} />
@@ -157,14 +159,14 @@ function AppContent() {
       </Routes>
     </>
   );
-}
+};
 
-function App() {
+const App: React.FC = () => {
   return (
     <Router>
       <AppContent />
     </Router>
   );
-}
+};
 
 export default App;
