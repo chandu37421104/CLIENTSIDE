@@ -1,11 +1,16 @@
 import { FC, useState } from "react";
+import axios from "axios";
 
+// Interface for Form Data
 interface FormData {
   name: string;
   email: string;
   id: string;
 }
-// Enroll Page Component
+
+// API Base URL
+const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+
 export const Adminenroll: FC = () => {
   const [userType, setUserType] = useState<string>('');
   const [formData, setFormData] = useState<FormData>({
@@ -13,7 +18,10 @@ export const Adminenroll: FC = () => {
     email: '',
     id: ''
   });
+  const [message, setMessage] = useState<string>('');
+  const [error, setError] = useState<string>('');
 
+  // Handle Input Change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -22,10 +30,21 @@ export const Adminenroll: FC = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
+  // Handle Form Submission
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
-    console.log('Enrollment Submitted:', { ...formData, userType });
-    // Add actual submission logic here
+    try {
+      setError('');
+      setMessage('Processing enrollment...');
+      const response = await axios.post(`${API_BASE_URL}/users`, {
+        ...formData,
+        role: userType, // Add userType as role
+      });
+      setMessage(`Enrollment successful! User ID: ${response.data._id}`);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to enroll user');
+      setMessage('');
+    }
   };
 
   return (
@@ -90,10 +109,10 @@ export const Adminenroll: FC = () => {
           className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition-colors"
         >
           Enroll
-        </button>
+        </button> 
       </form>
+      {message && <p className="mt-4 text-green-600">{message}</p>}
+      {error && <p className="mt-4 text-red-600">{error}</p>}
     </div>
   );
 };
-
-

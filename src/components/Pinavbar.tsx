@@ -23,7 +23,7 @@ export const Pinavbar = () => {
               <Link to="/pitask" className="block py-2 px-3 text-white hover:text-blue-700">Tasks</Link>
             </li>
             <li>
-              <Link to="/pileaderboard" className="block py-2 px-3 text-white hover:text-blue-700">Leaderboard</Link>
+              <Link to="/leaderboard" className="block py-2 px-3 text-white hover:text-blue-700">Leaderboard</Link>
             </li>
             <li>
               <Link to="/pirewards" className="block py-2 px-3 text-white hover:text-blue-700">Rewards</Link>

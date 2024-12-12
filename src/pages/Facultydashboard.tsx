@@ -1,7 +1,53 @@
+import React, { useEffect, useState } from 'react';
 import { TaskProgress } from '../components/TaskProgress';
-import { tasks, leaderboardData, facultyData } from '../data/mockData';
+import axios from 'axios';
+import { getUserIdFromToken } from '../utils/authHelpers';
+
+const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
 export const Facultydashboard = () => {
+  const [tasks, setTasks] = useState<any[]>([]);
+  const [leaderboardData, setLeaderboardData] = useState<any[]>([]);
+  const [facultyData, setFacultyData] = useState<any>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const facultyId = getUserIdFromToken(); // Dynamically fetch `userId` from the token
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      if (!facultyId) {
+        setError('User not authenticated');
+        setLoading(false);
+        return;
+      }
+
+      // Fetch tasks assigned to the faculty
+      const tasksResponse = await axios.get(`${API_BASE_URL}/tasks/user/${facultyId}`);
+      setTasks(tasksResponse.data);
+
+      // Fetch leaderboard data for faculty
+      const leaderboardResponse = await axios.get(`${API_BASE_URL}/leaderboard/faculty`);
+      setLeaderboardData(leaderboardResponse.data);
+
+      // Fetch faculty details
+      const facultyResponse = await axios.get(`${API_BASE_URL}/users/${facultyId}`);
+      setFacultyData(facultyResponse.data);
+
+      setLoading(false);
+    } catch (err) {
+      setError('Failed to fetch data. Please try again later.');
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [facultyId]);
+
   const totalPoints = tasks
     .filter(task => task.status === 'completed')
     .reduce((sum, task) => sum + task.points, 0);
@@ -15,12 +61,20 @@ export const Facultydashboard = () => {
 
   const badgeInfo = getBadgeInfo();
 
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="min-h-screen flex items-center justify-center text-red-500">{error}</div>;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       <header className="text-dark py-8 px-6">
         <div className="max-w-6xl mx-auto">
           <h1 className="text-3xl font-bold mb-2">
-            Welcome back, {facultyData.name}! 👋
+            Welcome back, {facultyData?.name || 'Faculty'}! 👋
           </h1>
           <div className="flex items-center gap-4">
             <p className="text-dark-100">
@@ -41,15 +95,15 @@ export const Facultydashboard = () => {
       <div className="max-w-6xl mx-auto px-6 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <TaskProgress tasks={tasks} />
-          
+
           <div className="bg-white rounded-lg shadow-sm p-6">
             <h2 className="text-xl font-semibold mb-4">Top 5 Leaders</h2>
             <div className="space-y-4">
-              {leaderboardData.slice(0, 5).map((player) => (
-                <div key={player.rank} className="flex items-center justify-between p-2">
+              {leaderboardData.slice(0, 5).map((player, index) => (
+                <div key={index} className="flex items-center justify-between p-2">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold">
-                      {player.avatar}
+                      {player.avatar || player.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
                       <p className="font-medium">{player.name}</p>

@@ -1,21 +1,63 @@
-import { facultytasks } from '../data/mockData';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { useAuth } from "../context/AuthContext";
+
+const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
 export const Facultyrewards = () => {
-    const completedTasks = facultytasks.filter((task) => task.status === 'completed');
-    const totalPoints = completedTasks.reduce((sum, task) => sum + task.points, 0);
-  
-    const getBadgeInfo = () => {
-      if (totalPoints >= 5000) return { type: 'Gold', color: 'yellow-500', emoji: '🏆' };
-      if (totalPoints >= 3000) return { type: 'Silver', color: 'gray-400', emoji: '🥈' };
-      if (totalPoints >= 1000) return { type: 'Bronze', color: 'amber-600', emoji: '🥉' };
-      return null;
-    };
+  const { user } = useAuth(); // Get current user from AuthContext
+  const [completedTasks, setCompletedTasks] = useState([]);
+  const [totalPoints, setTotalPoints] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchRewardsData = async () => {
+    try {
+      if (!user) {
+        setError("User not authenticated");
+        setLoading(false);
+        return;
+      }
+
+      // Fetch tasks for the faculty user
+      const response = await axios.get(`${API_BASE_URL}/tasks/user/${user.id}`);
+      const tasks = response.data.filter((task) => task.status === "completed");
+      const points = tasks.reduce((sum, task) => sum + task.points, 0);
+
+      setCompletedTasks(tasks);
+      setTotalPoints(points);
+      setLoading(false);
+    } catch (err) {
+      setError("Failed to fetch data. Please try again later.");
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRewardsData();
+  }, [user]);
+
+  const getBadgeInfo = () => {
+    if (totalPoints >= 5000) return { type: "Gold", color: "yellow-500", emoji: "🏆" };
+    if (totalPoints >= 3000) return { type: "Silver", color: "gray-400", emoji: "🥈" };
+    if (totalPoints >= 1000) return { type: "Bronze", color: "amber-600", emoji: "🥉" };
+    return null;
+  };
+
   const badgeInfo = getBadgeInfo();
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="min-h-screen flex items-center justify-center text-red-500">{error}</div>;
+  }
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-8">
       <h1 className="text-3xl font-bold mb-6">Rewards</h1>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Completed Tasks Section */}
         <div className="bg-white rounded-lg shadow-sm p-6">
@@ -50,7 +92,11 @@ export const Facultyrewards = () => {
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h2 className="text-xl font-semibold mb-4">Available Badges</h2>
           <div className="space-y-4">
-            <div className={`p-4 rounded-lg border-2 ${totalPoints >= 5000 ? 'border-yellow-500 bg-yellow-50' : 'border-gray-200'}`}>
+            <div
+              className={`p-4 rounded-lg border-2 ${
+                totalPoints >= 5000 ? "border-yellow-500 bg-yellow-50" : "border-gray-200"
+              }`}
+            >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">🏆</span>
@@ -63,7 +109,13 @@ export const Facultyrewards = () => {
               </div>
             </div>
 
-            <div className={`p-4 rounded-lg border-2 ${totalPoints >= 3000 && totalPoints < 5000 ? 'border-gray-400 bg-gray-50' : 'border-gray-200'}`}>
+            <div
+              className={`p-4 rounded-lg border-2 ${
+                totalPoints >= 3000 && totalPoints < 5000
+                  ? "border-gray-400 bg-gray-50"
+                  : "border-gray-200"
+              }`}
+            >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">🥈</span>
@@ -76,7 +128,13 @@ export const Facultyrewards = () => {
               </div>
             </div>
 
-            <div className={`p-4 rounded-lg border-2 ${totalPoints >= 1000 && totalPoints < 3000 ? 'border-amber-600 bg-amber-50' : 'border-gray-200'}`}>
+            <div
+              className={`p-4 rounded-lg border-2 ${
+                totalPoints >= 1000 && totalPoints < 3000
+                  ? "border-amber-600 bg-amber-50"
+                  : "border-gray-200"
+              }`}
+            >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">🥉</span>
@@ -94,13 +152,13 @@ export const Facultyrewards = () => {
 
       {badgeInfo && (
         <div className="mt-8 bg-white rounded-lg shadow-sm p-6 text-center">
-          <h3 className="text-2xl font-semibold mb-2">
-            Congratulations! 🎉
-          </h3>
+          <h3 className="text-2xl font-semibold mb-2">Congratulations! 🎉</h3>
           <p className="text-lg">
-            You've earned the <span className={`text-${badgeInfo.color} font-semibold`}>
+            You've earned the{" "}
+            <span className={`text-${badgeInfo.color} font-semibold`}>
               {badgeInfo.type} Badge
-            </span> {badgeInfo.emoji}
+            </span>{" "}
+            {badgeInfo.emoji}
           </p>
         </div>
       )}

@@ -1,11 +1,16 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useState, useEffect } from 'react';
+import axios from 'axios';
 
 // Type definition for reward form data
 interface RewardFormData {
   name: string;
   points: number;
   image: string;
+  _id?: string; // Include ID for backend-related operations
 }
+
+// API Base URL
+const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
 export const Adminreward: FC = () => {
   const [rewardData, setRewardData] = useState<RewardFormData>({
@@ -15,10 +20,28 @@ export const Adminreward: FC = () => {
   });
 
   const [rewards, setRewards] = useState<RewardFormData[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [message, setMessage] = useState<string>('');
+  const [error, setError] = useState<string>('');
 
-  // Calculate total points from rewards
-  const totalPoints = rewards.reduce((sum, reward) => sum + reward.points, 0);
+  // Fetch rewards from backend
+  const fetchRewards = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API_BASE_URL}/rewards`);
+      setRewards(response.data);
+      setLoading(false);
+    } catch (err: any) {
+      setError('Failed to fetch rewards');
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
+    fetchRewards();
+  }, []);
+
+  // Handle Input Change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
     setRewardData(prev => ({
@@ -27,41 +50,56 @@ export const Adminreward: FC = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
+  // Handle Form Submission
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
-    
+
     // Validate input
     if (!rewardData.name.trim()) {
-      alert('Reward name cannot be empty');
+      setError('Reward name cannot be empty');
       return;
     }
 
     if (rewardData.points <= 0) {
-      alert('Points must be greater than zero');
+      setError('Points must be greater than zero');
       return;
     }
 
-    // Add reward to list
-    setRewards(prevRewards => [...prevRewards, rewardData]);
-
-    // Reset form
-    setRewardData({
-      name: '',
-      points: 0,
-      image: ''
-    });
+    try {
+      setError('');
+      setMessage('Adding reward...');
+      const response = await axios.post(`${API_BASE_URL}/rewards`, rewardData);
+      setRewards(prevRewards => [...prevRewards, response.data]);
+      setMessage('Reward added successfully!');
+      setRewardData({ name: '', points: 0, image: '' }); // Reset form
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to add reward');
+    }
   };
 
-  const handleDeleteReward = (indexToRemove: number): void => {
-    setRewards(prevRewards => 
-      prevRewards.filter((_, index) => index !== indexToRemove)
-    );
+  // Handle Delete Reward
+  const handleDeleteReward = async (id: string): Promise<void> => {
+    try {
+      setMessage('Deleting reward...');
+      await axios.delete(`${API_BASE_URL}/rewards/${id}`);
+      setRewards(prevRewards => prevRewards.filter(reward => reward._id !== id));
+      setMessage('Reward deleted successfully!');
+    } catch (err: any) {
+      setError('Failed to delete reward');
+    }
   };
+
+  // Calculate total points from rewards
+  const totalPoints = rewards.reduce((sum, reward) => sum + reward.points, 0);
 
   return (
     <div className="bg-white shadow-md rounded-lg p-8">
       <h2 className="text-2xl font-bold mb-6">Add Reward</h2>
-      
+
+      {/* Display Messages */}
+      {message && <p className="text-green-600">{message}</p>}
+      {error && <p className="text-red-600">{error}</p>}
+
       {/* Reward Input Form */}
       <form onSubmit={handleSubmit} className="space-y-4 mb-8">
         <div>
@@ -112,13 +150,15 @@ export const Adminreward: FC = () => {
       </form>
 
       {/* Rewards List */}
-      {rewards.length > 0 && (
+      {loading ? (
+        <p>Loading rewards...</p>
+      ) : (
         <div>
           <h3 className="text-xl font-semibold mb-4">Current Rewards</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {rewards.map((reward, index) => (
               <div 
-                key={index} 
+                key={reward._id || index} 
                 className="border rounded p-4 flex flex-col justify-between"
               >
                 <div>
@@ -133,7 +173,7 @@ export const Adminreward: FC = () => {
                   )}
                 </div>
                 <button
-                  onClick={() => handleDeleteReward(index)}
+                  onClick={() => reward._id && handleDeleteReward(reward._id)}
                   className="mt-4 w-full bg-red-500 text-white p-2 rounded hover:bg-red-600"
                 >
                   Delete

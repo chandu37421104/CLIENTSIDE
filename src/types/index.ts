@@ -26,7 +26,10 @@ export interface LeaderboardEntry {
   name: string;
   points: number;
   avatar: string;
+  role: 'Faculty' | 'Student' | 'PI Team';
 }
+
+
 
 export interface Student {
   name: string;

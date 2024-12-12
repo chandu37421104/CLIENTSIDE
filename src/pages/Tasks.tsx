@@ -1,17 +1,57 @@
-import { useState } from 'react';
-import { tasks as initialTasks } from '../data/mockData';
-import { Task } from '../types';
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { Task } from "../types";
+
+const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+
 
 export const Tasks = () => {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const toggleTaskStatus = (taskId: number) => {
-    setTasks(tasks.map(task => 
-      task.id === taskId 
-        ? { ...task, status: task.status === 'completed' ? 'pending' : 'completed' }
-        : task
-    ));
+  // Fetch tasks from backend
+  const fetchTasks = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await axios.get(`${API_BASE_URL}/tasks/user`);
+      setTasks(response.data);
+      setLoading(false);
+    } catch (err) {
+      setError("Failed to fetch tasks. Please try again.");
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
+  // Toggle task status between "completed" and "pending"
+  const toggleTaskStatus = async (taskId: number, currentStatus: string) => {
+    try {
+      const newStatus = currentStatus === "completed" ? "pending" : "completed";
+      await axios.put(`${API_BASE_URL}/tasks/${taskId}/status`, { status: newStatus });
+
+      // Update local state
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task.id === taskId ? { ...task, status: newStatus } : task
+        )
+      );
+    } catch (err) {
+      alert("Failed to update task status. Please try again.");
+    }
+  };
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading tasks...</div>;
+  }
+
+  if (error) {
+    return <div className="min-h-screen flex items-center justify-center text-red-500">{error}</div>;
+  }
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-8">
@@ -26,8 +66,8 @@ export const Tasks = () => {
               <div className="flex items-center gap-3">
                 <input
                   type="checkbox"
-                  checked={task.status === 'completed'}
-                  onChange={() => toggleTaskStatus(task.id)}
+                  checked={task.status === "completed"}
+                  onChange={() => toggleTaskStatus(task.id, task.status)}
                   className="w-4 h-4 text-blue-600"
                 />
                 <div>
@@ -35,9 +75,7 @@ export const Tasks = () => {
                   <p className="text-sm text-gray-600">Points: {task.points}</p>
                 </div>
               </div>
-              <div className="text-sm text-gray-600">
-                Due: {task.deadline}
-              </div>
+              <div className="text-sm text-gray-600">Due: {task.deadline}</div>
             </div>
           ))}
         </div>
